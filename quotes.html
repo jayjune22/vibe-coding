@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>랜덤 명언</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #18181b;
+      --text: #fafafa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --accent: #a78bfa;
+      --accent-hover: #c4b5fd;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 560px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .filter-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      justify-content: center;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .quote-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .quote-text {
+      font-size: 1.25rem;
+      font-weight: 300;
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+
+    .quote-text::before {
+      content: '"';
+      color: var(--accent);
+    }
+
+    .quote-text::after {
+      content: '"';
+      color: var(--accent);
+    }
+
+    .quote-author {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .quote-category {
+      display: inline-block;
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: rgba(167, 139, 250, 0.15);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+
+    .new-btn {
+      display: block;
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .new-btn:hover {
+      background: var(--accent-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>랜덤 명언</h1>
+
+    <div class="filter-wrap">
+      <button class="filter-btn active" data-category="all">전체</button>
+      <button class="filter-btn" data-category="motivation">동기부여</button>
+      <button class="filter-btn" data-category="life">인생</button>
+      <button class="filter-btn" data-category="wisdom">지혜</button>
+      <button class="filter-btn" data-category="success">성공</button>
+    </div>
+
+    <div class="quote-card">
+      <span class="quote-category" id="quoteCategory">카테고리</span>
+      <p class="quote-text" id="quoteText">명언을 불러오는 중...</p>
+      <p class="quote-author" id="quoteAuthor">— 저자</p>
+    </div>
+
+    <button class="new-btn" id="newBtn" type="button">다른 명언 보기</button>
+  </div>
+
+  <script>
+    const quotes = [
+      { text: '성공은 매일 반복한 작은 노력들의 합이다.', author: '로버트 콜리어', category: 'success' },
+      { text: '오늘 할 수 있는 일을 내일로 미루지 마라.', author: '벤자민 프랭클린', category: 'motivation' },
+      { text: '실패는 성공의 어머니다.', author: '토마스 에디슨', category: 'success' },
+      { text: '삶이 그대를 속일지라도 슬퍼하거나 노여워하지 마라.', author: '알렉산드르 푸시킨', category: 'life' },
+      { text: '지식은 힘이라.', author: '프랜시스 베이컨', category: 'wisdom' },
+      { text: '시작이 반이다.', author: '플라톤', category: 'motivation' },
+      { text: '인생은 자전거를 타는 것과 같다. 균형을 유지하려면 계속 pedal을 밟아야 한다.', author: '알버트 아인슈타인', category: 'life' },
+      { text: '성공으로 가는 비결은 없다. 준비, 노력, 실패로부터 배우는 것이 전부다.', author: '콜린 파월', category: 'success' },
+      { text: '가장 큰 영광은 한 번도 넘어지지 않음이 아니라 넘어질 때마다 일어서는 데에 있다.', author: '넬슨 만델라', category: 'motivation' },
+      { text: '당신이 할 수 있다고 믿든 할 수 없다고 믿든, 당신 말이 맞다.', author: '헨리 포드', category: 'wisdom' },
+      { text: '인생은 아름다운 것이 아니라 소중한 것이다.', author: '스티븐 호킹', category: 'life' },
+      { text: '변화가 고통스러운 건, 성장하고 있다는 신호다.', author: '안젤리나 졸리', category: 'motivation' },
+      { text: '지금이 최악의 순간이 아니라, 다음에 일어날 일을 위한 준비 시간이다.', author: '마리 퀴리', category: 'wisdom' },
+      { text: '열정 없이 이룬 성공은 아무것도 아니다.', author: '빈스 롬바르디', category: 'success' },
+      { text: '어제의 나와 경쟁하라. 오늘의 나를 이겨라.', author: '알랭 드 보통', category: 'motivation' },
+    ];
+
+    const quoteText = document.getElementById('quoteText');
+    const quoteAuthor = document.getElementById('quoteAuthor');
+    const quoteCategory = document.getElementById('quoteCategory');
+    const newBtn = document.getElementById('newBtn');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    let currentCategory = 'all';
+    let lastQuote = null;
+
+    const categoryLabels = {
+      all: '전체',
+      motivation: '동기부여',
+      life: '인생',
+      wisdom: '지혜',
+      success: '성공'
+    };
+
+    function getFilteredQuotes() {
+      if (currentCategory === 'all') return quotes;
+      return quotes.filter(q => q.category === currentCategory);
+    }
+
+    function getRandomQuote() {
+      const filtered = getFilteredQuotes();
+      if (filtered.length === 0) return null;
+      let quote;
+      if (filtered.length === 1) {
+        quote = filtered[0];
+      } else {
+        do {
+          quote = filtered[Math.floor(Math.random() * filtered.length)];
+        } while (quote === lastQuote);
+      }
+      lastQuote = quote;
+      return quote;
+    }
+
+    function showQuote(quote) {
+      if (!quote) {
+        quoteText.textContent = '해당 카테고리에 명언이 없습니다.';
+        quoteAuthor.textContent = '';
+        quoteCategory.textContent = categoryLabels[currentCategory];
+        return;
+      }
+      quoteText.textContent = quote.text;
+      quoteAuthor.textContent = `— ${quote.author}`;
+      quoteCategory.textContent = categoryLabels[quote.category];
+    }
+
+    function updateQuote() {
+      const quote = getRandomQuote();
+      showQuote(quote);
+    }
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = btn.dataset.category;
+        updateQuote();
+      });
+    });
+
+    newBtn.addEventListener('click', updateQuote);
+
+    updateQuote();
+  </script>
+</body>
+</html>
