@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>다크모드 / 라이트모드 전환</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafafa;
+      --text: #18181b;
+      --surface: #ffffff;
+      --border: #e4e4e7;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0d0d0f;
+      --text: #fafafa;
+      --surface: #18181b;
+      --border: #27272a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 3rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+
+    [data-theme="dark"] .card {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>테마 전환</h1>
+    <button class="toggle-btn" type="button" aria-label="테마 전환">
+      <span class="mode-text">현재: 라이트 모드</span>
+    </button>
+  </main>
+
+  <script>
+    const html = document.documentElement;
+    const toggleBtn = document.querySelector('.toggle-btn');
+    const modeText = document.querySelector('.mode-text');
+
+    // 초기 테마 확인 (localStorage 또는 시스템 설정)
+    const savedTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+      html.setAttribute('data-theme', savedTheme);
+    } else if (systemDark) {
+      html.setAttribute('data-theme', 'dark');
+    }
+
+    function updateButtonText() {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      modeText.textContent = isDark ? '현재: 다크 모드' : '현재: 라이트 모드';
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const newTheme = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateButtonText();
+    });
+
+    updateButtonText();
+  </script>
+</body>
+</html>

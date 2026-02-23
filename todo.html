@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #18181b;
+      --text: #fafafa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --accent: #a78bfa;
+      --accent-hover: #c4b5fd;
+      --danger: #f87171;
+      --danger-hover: #fca5a5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding-top: 3rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    .input-wrap {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-wrap input {
+      flex: 1;
+      padding: 0.875rem 1rem;
+      font-family: inherit;
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrap input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      padding: 0.875rem 1.25rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-add {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-add:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-add:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .todo-list {
+      list-style: none;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+      transition: opacity 0.2s;
+    }
+
+    .todo-item.done {
+      opacity: 0.6;
+    }
+
+    .todo-item.done .todo-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .todo-item.done .checkbox {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .checkbox svg {
+      width: 12px;
+      height: 12px;
+      color: white;
+    }
+
+    .todo-text {
+      flex: 1;
+      font-size: 0.95rem;
+    }
+
+    .btn-delete {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.8rem;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>할 일 목록</h1>
+
+    <div class="input-wrap">
+      <input
+        type="text"
+        id="todoInput"
+        placeholder="할 일을 입력하세요"
+        maxlength="100"
+        autocomplete="off"
+      >
+      <button class="btn btn-add" id="addBtn" type="button">추가</button>
+    </div>
+
+    <ul class="todo-list" id="todoList">
+      <li class="empty-state" id="emptyState">할 일이 없습니다. 새로 추가해 보세요.</li>
+    </ul>
+  </div>
+
+  <script>
+    const todoInput = document.getElementById('todoInput');
+    const addBtn = document.getElementById('addBtn');
+    const todoList = document.getElementById('todoList');
+    const emptyState = document.getElementById('emptyState');
+
+    let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+    function render() {
+      todoList.innerHTML = '';
+
+      if (todos.length === 0) {
+        todoList.appendChild(emptyState);
+        saveTodos();
+        return;
+      }
+
+      todos.forEach((todo, index) => {
+        const li = document.createElement('li');
+        li.className = `todo-item ${todo.done ? 'done' : ''}`;
+        li.dataset.index = index;
+        li.innerHTML = `
+          <div class="checkbox" role="button" tabindex="0" aria-label="완료">
+            ${todo.done ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>' : ''}
+          </div>
+          <span class="todo-text">${escapeHtml(todo.text)}</span>
+          <button class="btn-delete" type="button" aria-label="삭제">삭제</button>
+        `;
+        todoList.appendChild(li);
+      });
+
+      // 이벤트 바인딩
+      todoList.querySelectorAll('.todo-item').forEach((item) => {
+        const index = parseInt(item.dataset.index, 10);
+        item.querySelector('.checkbox').addEventListener('click', () => toggleTodo(index));
+        item.querySelector('.btn-delete').addEventListener('click', () => deleteTodo(index));
+      });
+
+      saveTodos();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function addTodo() {
+      const text = todoInput.value.trim();
+      if (!text) return;
+      todos.push({ text, done: false });
+      todoInput.value = '';
+      todoInput.focus();
+      render();
+    }
+
+    function toggleTodo(index) {
+      todos[index].done = !todos[index].done;
+      render();
+    }
+
+    function deleteTodo(index) {
+      todos.splice(index, 1);
+      render();
+    }
+
+    function saveTodos() {
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    addBtn.addEventListener('click', addTodo);
+    todoInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.isComposing) addTodo();
+    });
+
+    render();
+  </script>
+</body>
+</html>

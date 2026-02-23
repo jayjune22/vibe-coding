@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML 문서 구조</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f0f0f;
+    color: #e0e0e0;
+    font-family: -apple-system, sans-serif;
+    padding: 40px 24px;
+  }
+
+  h1 { font-size: 18px; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #555; margin-bottom: 40px; }
+
+  .section { margin-bottom: 48px; }
+  .section-title {
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 2px; color: #555;
+    margin-bottom: 16px; font-weight: 600;
+  }
+
+  /* 문서 구조 트리 */
+  .doc-wrap {
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .doc-row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .doc-row:last-child { border-bottom: none; }
+
+  .doc-indent {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    flex: 1;
+    gap: 10px;
+    font-family: monospace;
+    font-size: 13px;
+  }
+
+  .doc-label {
+    min-width: 160px;
+    padding: 12px 16px;
+    font-size: 11px;
+    color: #666;
+    border-left: 1px solid #1e1e1e;
+    display: flex;
+    align-items: center;
+    background: #0d0d0d;
+  }
+
+  .tag { font-weight: 600; }
+  .tag-root    { color: #fff; }
+  .tag-head    { color: #7b9fff; }
+  .tag-body    { color: #6fcf6f; }
+  .tag-css     { color: #c97bff; }
+  .tag-js      { color: #f0a830; }
+  .tag-gray    { color: #555; }
+  .tag-element { color: #ff8c69; }
+
+  .indent-1 { padding-left: 16px; }
+  .indent-2 { padding-left: 32px; }
+  .indent-3 { padding-left: 48px; }
+  .indent-4 { padding-left: 64px; }
+
+  .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: -apple-system, sans-serif;
+    font-weight: 500;
+  }
+  .badge-blue   { background: #1a1a3e; color: #7b9fff; }
+  .badge-green  { background: #1a2e1a; color: #6fcf6f; }
+  .badge-purple { background: #2a1a3e; color: #c97bff; }
+  .badge-orange { background: #3e2a0e; color: #f0a830; }
+  .badge-gray   { background: #1e1e1e; color: #666; }
+
+  .row-head { background: #111520; }
+  .row-body { background: #111811; }
+  .row-css  { background: #130e1a; }
+  .row-js   { background: #1a1408; }
+  .row-el   { background: #141010; }
+
+  /* 순서 설명 */
+  .order-list { display: flex; flex-direction: column; gap: 12px; }
+  .order-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .order-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .num-blue   { background: #1a1a3e; color: #7b9fff; }
+  .num-purple { background: #2a1a3e; color: #c97bff; }
+  .num-orange { background: #3e2a0e; color: #f0a830; }
+
+  .order-content {}
+  .order-title { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .order-desc  { font-size: 12px; color: #777; line-height: 1.6; }
+  .order-code  {
+    margin-top: 8px;
+    background: #0d0d0d;
+    border: 1px solid #222;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #aaa;
+    line-height: 1.8;
+  }
+
+  /* 파일 구조 */
+  .file-tree {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 20px;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 2;
+  }
+  .file-folder { color: #7b9fff; }
+  .file-html   { color: #ff8c69; }
+  .file-css    { color: #c97bff; }
+  .file-js     { color: #f0a830; }
+  .file-gray   { color: #555; }
+
+  /* 규칙 */
+  .rule-box {
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+  }
+  .rule-title { font-size: 12px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .rule-desc  { font-size: 12px; color: #777; line-height: 1.6; }
+  .rule-highlight { color: #f0a830; }
+</style>
+</head>
+<body>
+
+<h1>HTML 문서의 구조</h1>
+<p class="subtitle">한 파일 안에서 코드가 쌓이는 순서</p>
+
+<!-- 1. 문서 트리 -->
+<div class="section">
+  <div class="section-title">01 · 전체 구조 한눈에</div>
+  <div class="doc-wrap">
+
+    <div class="doc-row">
+      <div class="doc-indent indent-1">
+        <span class="tag tag-gray">&lt;!DOCTYPE html&gt;</span>
+      </div>
+      <div class="doc-label">브라우저에게 "이건 HTML5야" 선언</div>
+    </div>
+
+    <div class="doc-row">
+      <div class="doc-indent indent-1">
+        <span class="tag tag-root">&lt;html&gt;</span>
+      </div>
+      <div class="doc-label">문서 전체를 감싸는 최상위 태그</div>
+    </div>
+
+    <!-- HEAD -->
+    <div class="doc-row row-head">
+      <div class="doc-indent indent-2">
+        <span class="tag tag-head">&lt;head&gt;</span>
+        <span class="badge badge-blue">눈에 안 보이는 영역</span>
+      </div>
+      <div class="doc-label">브라우저를 위한 설정 공간</div>
+    </div>
+
+    <div class="doc-row row-head">
+      <div class="doc-indent indent-3">
+        <span class="tag tag-gray">&lt;meta charset="UTF-8"&gt;</span>
+      </div>
+      <div class="doc-label">한글 깨짐 방지</div>
+    </div>
+
+    <div class="doc-row row-head">
+      <div class="doc-indent indent-3">
+        <span class="tag tag-gray">&lt;title&gt;</span> 페이지 제목 <span class="tag tag-gray">&lt;/title&gt;</span>
+      </div>
+      <div class="doc-label">탭에 표시되는 이름</div>
+    </div>
+
+    <div class="doc-row row-css">
+      <div class="doc-indent indent-3">
+        <span class="tag tag-css">&lt;link rel="stylesheet" href="style.css"&gt;</span>
+      </div>
+      <div class="doc-label" style="color:#c97bff">CSS 파일 연결 ← 여기!</div>
+    </div>
+
+    <div class="doc-row row-head">
+      <div class="doc-indent indent-2">
+        <span class="tag tag-head">&lt;/head&gt;</span>
+      </div>
+      <div class="doc-label"></div>
+    </div>
+
+    <!-- BODY -->
+    <div class="doc-row row-body">
+      <div class="doc-indent indent-2">
+        <span class="tag tag-body">&lt;body&gt;</span>
+        <span class="badge badge-green">눈에 보이는 영역</span>
+      </div>
+      <div class="doc-label">실제 화면에 표시되는 공간</div>
+    </div>
+
+    <div class="doc-row row-el">
+      <div class="doc-indent indent-3">
+        <span class="tag tag-element">&lt;h1&gt;</span> 제목 <span class="tag tag-element">&lt;/h1&gt;</span>
+      </div>
+      <div class="doc-label">큰 제목</div>
+    </div>
+
+    <div class="doc-row row-el">
+      <div class="doc-indent indent-3">
+        <span class="tag tag-element">&lt;p&gt;</span> 문단 텍스트 <span class="tag tag-element">&lt;/p&gt;</span>
+      </div>
+      <div class="doc-label">문단</div>
+    </div>
+
+    <div class="doc-row row-el">
+      <div class="doc-indent indent-3">
+        <span class="tag tag-element">&lt;button&gt;</span> 클릭 <span class="tag tag-element">&lt;/button&gt;</span>
+      </div>
+      <div class="doc-label">버튼</div>
+    </div>
+
+    <div class="doc-row row-el">
+      <div class="doc-indent indent-3">
+        <span class="tag tag-element">&lt;div&gt;</span> ... <span class="tag tag-element">&lt;/div&gt;</span>
+      </div>
+      <div class="doc-label">그룹 묶음 (상자)</div>
+    </div>
+
+    <div class="doc-row row-js">
+      <div class="doc-indent indent-3">
+        <span class="tag tag-js">&lt;script src="app.js"&gt;&lt;/script&gt;</span>
+      </div>
+      <div class="doc-label" style="color:#f0a830">JS 파일 연결 ← 맨 아래!</div>
+    </div>
+
+    <div class="doc-row row-body">
+      <div class="doc-indent indent-2">
+        <span class="tag tag-body">&lt;/body&gt;</span>
+      </div>
+      <div class="doc-label"></div>
+    </div>
+
+    <div class="doc-row">
+      <div class="doc-indent indent-1">
+        <span class="tag tag-root">&lt;/html&gt;</span>
+      </div>
+      <div class="doc-label"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 2. CSS JS 위치 이유 -->
+<div class="section">
+  <div class="section-title">02 · CSS는 위, JS는 아래인 이유</div>
+  <div class="order-list">
+
+    <div class="order-item">
+      <div class="order-num num-blue">1</div>
+      <div class="order-content">
+        <div class="order-title">CSS는 &lt;head&gt; 안에 — 화면보다 먼저 로드</div>
+        <div class="order-desc">브라우저가 화면을 그리기 전에 스타일을 알고 있어야 해요. 늦게 로드되면 스타일 없는 날것의 HTML이 잠깐 보이는 현상이 생겨요.</div>
+        <div class="order-code">&lt;head&gt;<br>  &lt;link rel="stylesheet" href="style.css"&gt;  ← CSS 먼저<br>&lt;/head&gt;</div>
+      </div>
+    </div>
+
+    <div class="order-item">
+      <div class="order-num num-orange">2</div>
+      <div class="order-content">
+        <div class="order-title">JS는 &lt;/body&gt; 바로 위 — HTML 다 그린 뒤 실행</div>
+        <div class="order-desc">JS가 버튼을 찾으려면 버튼이 먼저 HTML에 존재해야 해요. JS를 위에 두면 아직 버튼이 없어서 "버튼을 못 찾겠어" 오류가 생겨요.</div>
+        <div class="order-code">&lt;body&gt;<br>  &lt;button&gt;클릭&lt;/button&gt;  ← HTML 먼저 그려짐<br>  &lt;script src="app.js"&gt;&lt;/script&gt;  ← JS는 맨 아래<br>&lt;/body&gt;</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 3. 파일 분리 구조 -->
+<div class="section">
+  <div class="section-title">03 · 실제 프로젝트 파일 구조</div>
+  <div class="file-tree">
+    <span class="file-folder">📁 VibeCoding/</span><br>
+    &nbsp;&nbsp;<span class="file-folder">📁 01-namecard/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-html">📄 index.html</span> &nbsp;<span class="file-gray">← 뼈대</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-css">📄 style.css</span> &nbsp;&nbsp;<span class="file-gray">← 옷</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-js">📄 app.js</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-gray">← 동작</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="file-folder">📁 02-darkmode/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-html">📄 index.html</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-css">📄 style.css</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file-js">📄 app.js</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="file-gray">📁 03-todo/ ...</span>
+  </div>
+</div>
+
+<!-- 4. 핵심 규칙 -->
+<div class="section">
+  <div class="section-title">04 · 기억할 규칙 3가지</div>
+
+  <div class="rule-box">
+    <div class="rule-title">① 태그는 반드시 열고 닫는다</div>
+    <div class="rule-desc"><span class="rule-highlight">&lt;div&gt;</span> 열었으면 <span class="rule-highlight">&lt;/div&gt;</span> 로 닫아야 해요. 단, &lt;img&gt; &lt;input&gt; &lt;br&gt; 같은 셀프 클로징 태그는 예외.</div>
+  </div>
+
+  <div class="rule-box">
+    <div class="rule-title">② 들여쓰기는 구조를 읽는 눈</div>
+    <div class="rule-desc">기능에는 영향 없지만 들여쓰기가 맞아야 부모-자식 관계가 보여요. Prettier 플러그인이 자동으로 정렬해줘요.</div>
+  </div>
+
+  <div class="rule-box">
+    <div class="rule-title">③ 한 파일에 다 넣어도 되고, 분리해도 된다</div>
+    <div class="rule-desc">지금 실습 예제처럼 HTML 파일 하나 안에 &lt;style&gt; 태그로 CSS, &lt;script&gt; 태그로 JS를 다 넣을 수 있어요. 규모가 커지면 파일을 분리하는 거예요.</div>
+  </div>
+
+</div>
+
+</body>
+</html>

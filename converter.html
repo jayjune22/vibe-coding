@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>환율 계산기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #18181b;
+      --text: #fafafa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --accent: #a78bfa;
+      --accent-hover: #c4b5fd;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .rate-info {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrap:focus-within {
+      border-color: var(--accent);
+    }
+
+    .input-wrap input {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1.1rem;
+      outline: none;
+    }
+
+    .input-wrap input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .currency {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      min-width: 2.5rem;
+    }
+
+    .arrow {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      margin: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>환율 계산기</h1>
+    <p class="rate-info">1 USD = 1,350 KRW</p>
+
+    <div class="input-group">
+      <label>달러 (USD)</label>
+      <div class="input-wrap">
+        <input type="text" id="usdInput" placeholder="0" inputmode="decimal" autocomplete="off">
+        <span class="currency">USD</span>
+      </div>
+    </div>
+
+    <div class="arrow">↕</div>
+
+    <div class="input-group">
+      <label>원화 (KRW)</label>
+      <div class="input-wrap">
+        <input type="text" id="krwInput" placeholder="0" inputmode="numeric" autocomplete="off">
+        <span class="currency">KRW</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const RATE = 1350;
+    const usdInput = document.getElementById('usdInput');
+    const krwInput = document.getElementById('krwInput');
+    let isUpdating = false;
+
+    function formatUsd(value) {
+      if (value === '' || isNaN(value)) return '';
+      const num = parseFloat(value);
+      return num % 1 === 0 ? num.toString() : num.toFixed(2);
+    }
+
+    function formatKrw(value) {
+      if (value === '' || isNaN(value)) return '';
+      return parseInt(value, 10).toLocaleString('ko-KR');
+    }
+
+    function parseNumber(str) {
+      return parseFloat(String(str).replace(/,/g, '')) || 0;
+    }
+
+    usdInput.addEventListener('input', () => {
+      if (isUpdating) return;
+      isUpdating = true;
+      const usd = parseNumber(usdInput.value);
+      krwInput.value = formatKrw(Math.round(usd * RATE));
+      isUpdating = false;
+    });
+
+    krwInput.addEventListener('input', () => {
+      if (isUpdating) return;
+      isUpdating = true;
+      const raw = krwInput.value.replace(/\D/g, '');
+      const krw = parseInt(raw, 10) || 0;
+      usdInput.value = formatUsd((krw / RATE).toFixed(2));
+      krwInput.value = formatKrw(raw);
+      isUpdating = false;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>정한준 | UX/UI 디자이너</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #18181b;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --accent: #a78bfa;
+      --accent-hover: #c4b5fd;
+      --border: #27272a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 3rem;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .name {
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+
+    .role {
+      color: var(--accent);
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 2rem;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 2rem 0;
+    }
+
+    .contact {
+      margin-bottom: 1.5rem;
+    }
+
+    .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+    }
+
+    .email {
+      font-size: 0.95rem;
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .email:hover {
+      color: var(--accent);
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .link {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .link:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(167, 139, 250, 0.08);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1 class="name">정한준</h1>
+    <p class="role">UX/UI 디자이너</p>
+
+    <div class="divider"></div>
+
+    <div class="contact">
+      <p class="label">이메일</p>
+      <a class="email" href="mailto:hello@example.com">hello@example.com</a>
+    </div>
+
+    <div>
+      <p class="label">링크</p>
+      <div class="links">
+        <a class="link" href="https://behance.net" target="_blank" rel="noopener">Behance</a>
+        <a class="link" href="https://dribbble.com" target="_blank" rel="noopener">Dribbble</a>
+        <a class="link" href="https://linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
