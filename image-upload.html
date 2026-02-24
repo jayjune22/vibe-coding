@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이미지 업로드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #18181b;
+      --text: #fafafa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --accent: #a78bfa;
+      --accent-hover: #c4b5fd;
+      --danger: #f87171;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      padding: 3rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 2rem;
+      background: var(--surface);
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(167, 139, 250, 0.08);
+    }
+
+    .dropzone-icon {
+      font-size: 2.5rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .dropzone-text {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    .dropzone-text strong {
+      color: var(--accent);
+    }
+
+    .dropzone-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1rem;
+    }
+
+    .preview-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-item .delete-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .preview-item:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .preview-item .delete-btn:hover {
+      background: var(--danger);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>이미지 업로드</h1>
+
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">📷</div>
+      <p class="dropzone-text">이미지를 <strong>드래그해서 놓거나</strong> 클릭하여 선택하세요</p>
+      <p class="dropzone-hint">여러 장 선택 가능 (JPG, PNG, GIF, WebP)</p>
+      <input type="file" id="fileInput" accept="image/*" multiple>
+    </div>
+
+    <div class="preview-grid" id="previewGrid"></div>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const previewGrid = document.getElementById('previewGrid');
+
+    const images = [];
+
+    function addImages(files) {
+      const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+      if (imageFiles.length === 0) return;
+
+      imageFiles.forEach(file => {
+        const id = `img-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const url = URL.createObjectURL(file);
+        images.push({ id, url, file });
+        renderPreview();
+      });
+    }
+
+    function removeImage(id) {
+      const index = images.findIndex(img => img.id === id);
+      if (index === -1) return;
+      URL.revokeObjectURL(images[index].url);
+      images.splice(index, 1);
+      renderPreview();
+    }
+
+    function renderPreview() {
+      previewGrid.innerHTML = images.map(img => `
+        <div class="preview-item" data-id="${img.id}">
+          <img src="${img.url}" alt="미리보기">
+          <button class="delete-btn" type="button" aria-label="삭제">×</button>
+        </div>
+      `).join('');
+
+      previewGrid.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const item = btn.closest('.preview-item');
+          removeImage(item.dataset.id);
+        });
+      });
+    }
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      addImages(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      addImages(e.target.files);
+      e.target.value = '';
+    });
+  </script>
+</body>
+</html>
