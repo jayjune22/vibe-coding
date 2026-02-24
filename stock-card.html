@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관심 종목</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #18181b;
+      --text: #fafafa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --accent: #a78bfa;
+      --accent-hover: #c4b5fd;
+      --rise: #34d399;
+      --fall: #f87171;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    .search-wrap {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-wrap input {
+      flex: 1;
+      padding: 0.875rem 1rem;
+      font-family: inherit;
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-wrap input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-btn {
+      padding: 0.875rem 1.25rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .search-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .message.visible {
+      display: block;
+    }
+
+    .message.error {
+      background: rgba(248, 113, 113, 0.15);
+      border: 1px solid var(--fall);
+      color: var(--fall);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .stock-card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    .stock-card .delete-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .stock-card .delete-btn:hover {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--fall);
+    }
+
+    .stock-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      padding-right: 28px;
+    }
+
+    .stock-code {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .stock-price {
+      font-size: 1.5rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stock-change {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-top: 0.25rem;
+    }
+
+    .stock-change.rise {
+      color: var(--rise);
+    }
+
+    .stock-change.fall {
+      color: var(--fall);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>관심 종목</h1>
+
+    <div class="search-wrap">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="종목명 또는 코드 검색 (예: 삼성전자, AAPL)"
+        autocomplete="off"
+      >
+      <button class="search-btn" id="searchBtn" type="button">추가</button>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <div class="cards" id="cards">
+      <div class="empty-state" id="emptyState">종목을 검색하여 추가해 보세요.</div>
+    </div>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const message = document.getElementById('message');
+    const cardsContainer = document.getElementById('cards');
+    const emptyState = document.getElementById('emptyState');
+
+    // 샘플 종목 데이터 (검색 시 매칭)
+    const sampleStocks = {
+      '삼성전자': { name: '삼성전자', code: '005930', price: 71800, change: 1.24 },
+      '005930': { name: '삼성전자', code: '005930', price: 71800, change: 1.24 },
+      'SK하이닉스': { name: 'SK하이닉스', code: '000660', price: 234500, change: -0.85 },
+      '000660': { name: 'SK하이닉스', code: '000660', price: 234500, change: -0.85 },
+      'LG에너지솔루션': { name: 'LG에너지솔루션', code: '373220', price: 312000, change: 2.15 },
+      '373220': { name: 'LG에너지솔루션', code: '373220', price: 312000, change: 2.15 },
+      '현대차': { name: '현대차', code: '005380', price: 268500, change: -0.37 },
+      '005380': { name: '현대차', code: '005380', price: 268500, change: -0.37 },
+      '네이버': { name: '네이버', code: '035420', price: 198200, change: 0.51 },
+      '035420': { name: '네이버', code: '035420', price: 198200, change: 0.51 },
+      '카카오': { name: '카카오', code: '035720', price: 42150, change: -1.52 },
+      '035720': { name: '카카오', code: '035720', price: 42150, change: -1.52 },
+      'AAPL': { name: '애플', code: 'AAPL', price: 228.45, change: 0.89 },
+      '애플': { name: '애플', code: 'AAPL', price: 228.45, change: 0.89 },
+      'MSFT': { name: '마이크로소프트', code: 'MSFT', price: 415.22, change: -0.32 },
+      '마이크로소프트': { name: '마이크로소프트', code: 'MSFT', price: 415.22, change: -0.32 },
+      'GOOGL': { name: '구글', code: 'GOOGL', price: 172.18, change: 1.45 },
+      '구글': { name: '구글', code: 'GOOGL', price: 172.18, change: 1.45 },
+      'TSLA': { name: '테슬라', code: 'TSLA', price: 242.84, change: -2.10 },
+      '테슬라': { name: '테슬라', code: 'TSLA', price: 242.84, change: -2.10 },
+    };
+
+    let watchlist = JSON.parse(localStorage.getItem('stockWatchlist')) || [];
+
+    function showMessage(text, type = 'error') {
+      message.textContent = text;
+      message.className = `message visible ${type}`;
+      setTimeout(() => message.classList.remove('visible'), 3000);
+    }
+
+    function findStock(query) {
+      const trimmed = query.trim();
+      if (!trimmed) return null;
+      const q = trimmed.toUpperCase();
+      for (const [key, stock] of Object.entries(sampleStocks)) {
+        const keyUpper = String(key).toUpperCase();
+        if (keyUpper === q || key === trimmed ||
+            stock.code.toUpperCase() === q || stock.code === trimmed ||
+            stock.name === trimmed || stock.name.includes(trimmed)) {
+          return { ...stock };
+        }
+      }
+      return null;
+    }
+
+    function formatPrice(price, code) {
+      const num = price >= 1000 ? price.toLocaleString('ko-KR') : price.toFixed(2);
+      return /^[0-9]+$/.test(code) ? `${num}원` : `$${num}`;
+    }
+
+    function addStock(stock) {
+      if (watchlist.some(s => s.code === stock.code)) {
+        showMessage('이미 추가된 종목입니다.');
+        return;
+      }
+      watchlist.push(stock);
+      saveAndRender();
+    }
+
+    function removeStock(code) {
+      watchlist = watchlist.filter(s => s.code !== code);
+      saveAndRender();
+    }
+
+    function saveAndRender() {
+      localStorage.setItem('stockWatchlist', JSON.stringify(watchlist));
+      render();
+    }
+
+    function render() {
+      cardsContainer.innerHTML = '';
+      emptyState.style.display = watchlist.length === 0 ? 'block' : 'none';
+
+      if (watchlist.length === 0) {
+        cardsContainer.appendChild(emptyState);
+        return;
+      }
+
+      watchlist.forEach(stock => {
+        const card = document.createElement('div');
+        card.className = 'stock-card';
+        const isRise = stock.change >= 0;
+        const changeText = `${isRise ? '+' : ''}${stock.change}%`;
+        card.innerHTML = `
+          <button class="delete-btn" type="button" aria-label="삭제">×</button>
+          <div class="stock-name">${stock.name}</div>
+          <div class="stock-code">${stock.code}</div>
+          <div class="stock-price">${formatPrice(stock.price, stock.code)}</div>
+          <div class="stock-change ${isRise ? 'rise' : 'fall'}">${changeText}</div>
+        `;
+        card.querySelector('.delete-btn').addEventListener('click', () => removeStock(stock.code));
+        cardsContainer.appendChild(card);
+      });
+    }
+
+    function handleSearch() {
+      const query = searchInput.value.trim();
+      if (!query) {
+        showMessage('종목명 또는 코드를 입력해 주세요.');
+        return;
+      }
+
+      const stock = findStock(query);
+      if (stock) {
+        addStock(stock);
+        searchInput.value = '';
+        searchInput.focus();
+      } else {
+        showMessage('해당 종목을 찾을 수 없습니다. 샘플: 삼성전자, AAPL, 테슬라');
+      }
+    }
+
+    searchBtn.addEventListener('click', handleSearch);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.isComposing) handleSearch();
+    });
+
+    render();
+  </script>
+</body>
+</html>
